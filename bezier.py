@@ -12,6 +12,7 @@ def Bezier(p1,p2,p3,p4):
     tList = [i/100 for i in tList]
     b_x = []
     b_y = []
+    b_alpha1 = [0]
     step = 0
     i = 0
     for tt in tList:
@@ -19,6 +20,7 @@ def Bezier(p1,p2,p3,p4):
         b_y.append((1-tt)**3*(p1.y)+3*(1-tt)**2*tt*(p2.y)+3*(1-tt)*tt**2*(p3.y)+tt**3*(p4.y))
         if(i >= 1):
             step += (math.sqrt((b_x[-1]-b_x[-2])**2+(b_y[-1]-b_y[-2])**2))
+            b_alpha1.append(math.atan2(-(b_x[-1]-b_x[-2]),-(b_y[-1]-b_y[-2]))) #radius
         i+=1
     
     step = step/len(tList)
@@ -30,7 +32,7 @@ def Bezier(p1,p2,p3,p4):
     # ax = plt.gca()
     # ax.set_aspect('equal', adjustable='box')
     # plt.show()
-    return step, b_x, b_y
+    return step, b_x, b_y, b_alpha1
 
 def main():
     p1 = RPoint(0,0)

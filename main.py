@@ -28,22 +28,24 @@ class Car:
     self.steerAngle = steerAngle/180*math.pi
     self.lane = lane   
     self.acc = meter2pixel(acc)/10 #acceleration
-    self.probList = [[] for i in range(4)]
-    self.timeList = [[] for i in range(4)]
-    self.timeList2 = [[] for i in range(4)]
+    self.probList   = [[] for i in range(4)]
+    self.timeList   = [[] for i in range(4)]
+    self.timeList2  = [[] for i in range(4)]
     self.alpha1List = [[] for i in range(4)]
     self.alpha2List = [[] for i in range(4)]
-    self.DList = [[] for i in range(4)]
-    self.RList = [[] for i in range(4)]
-    self.rList = [[] for i in range(4)]
-    self.vList = [[] for i in range(4)]
-    self.xList = [[] for i in range(4)]
-    self.yList = [[] for i in range(4)]
+    self.DList      = [[] for i in range(4)]
+    self.RList      = [[] for i in range(4)]
+    self.rList      = [[] for i in range(4)]
+    self.vList      = [[] for i in range(4)]
+    self.xList      = [[] for i in range(4)]
+    self.yList      = [[] for i in range(4)]
     self.mode = 'stand_by'
 
   def drive(self,egoCar):
+    global lane_changing
     self.vel += self.acc
     if self.mode == 'stand_by':
+      self.steerAngle = 0
       self.x += self.vel*math.sin(self.steerAngle) # Real x(pixel)
       self.y -= self.vel*math.cos(self.steerAngle) # Real y(pixel)
     if self.mode == 'lane_change':
@@ -51,8 +53,13 @@ class Car:
       if (self.i >= len(self.b_x)):
         self.i = len(self.b_x)-1
         self.mode = 'stand_by'
+        print("back to stand by")
+        
+        lane_changing = 0
       self.x = self.b_x[self.i]
       self.y = self.b_y[self.i]
+      self.steerAngle = self.b_alpha1[self.i]
+    
     self.y_ref -= self.vel*math.cos(self.steerAngle)-egoCar.vel*math.cos(egoCar.steerAngle) # For relative view on screen
     self.x_tl = self.x-meter2pixel(carWidth)/2  #top left x
     self.y_tl = self.y_ref-meter2pixel(carLength)/2 #top left y
@@ -63,8 +70,8 @@ class Car:
       self.timeList2[i].append(pygame.time.get_ticks()/1000)
       
 def cal_prob(eCar,TCar,i):
-  eCar.D = pixel2meter(math.sqrt((eCar.x- TCar.x)**2+(eCar.y - TCar.y)**2))
-  eCar.alpha1 = math.atan2(-(TCar.x-eCar.x),-(TCar.y-eCar.y)) #radius 
+  eCar.D        = pixel2meter(math.sqrt((eCar.x- TCar.x)**2+(eCar.y - TCar.y)**2))
+  eCar.alpha1   = math.atan2(-(TCar.x-eCar.x),-(TCar.y-eCar.y)) #radius 
   eCar.alpha1_h = eCar.alpha1-eCar.steerAngle # angle between forward direction and target vehicle
 
   if (eCar.alpha1_h <= math.pi/2) & (eCar.alpha1_h >= -math.pi/2):
@@ -99,8 +106,8 @@ def cal_prob(eCar,TCar,i):
   eCar.rList[i].append(eCar.r)
   
 def plot_prob(TCar,i):
-  # plt.subplot(331)
-  # plt.plot(TCar.timeList[i],TCar.probList[i])
+  plt.subplot(121)
+  plt.plot(TCar.timeList[i],TCar.probList[i])
   # plt.subplot(332)
   # # plt.plot(TCar.timeList[i],TCar.alpha1List[i])
   # # plt.subplot(333)
@@ -114,6 +121,7 @@ def plot_prob(TCar,i):
   # plt.subplot(337)
   # plt.plot(TCar.timeList2[i],TCar.yList[i])
   # plt.subplot(338)
+  plt.subplot(122)
   plt.plot(TCar.xList[i],TCar.yList[i])
   plt.xlim(0, 10)
   ax = plt.gca()
@@ -165,9 +173,10 @@ clock = pygame.time.Clock()
 egoCar = Car('R',20,80,0,0)
 LFCar  = Car('L',5,81,0,0)
 FCar   = Car('R',10,75,0,0)
-LRCar  = Car('L',35,80,0,0)
+LRCar  = Car('L',35,83,0,0)
 RCar   = Car('R',35,80,0,0)
 start_lane_change = False
+lane_changing = False
 
 
 def refreshScreen():
@@ -184,20 +193,24 @@ def refreshScreen():
 
 def car_move():
   global start_lane_change
+  global lane_changing
   if(egoCar.probList[1][-1] >= 0.2 and start_lane_change == 0):
     egoCar.mode = 'lane_change'
     p1 = RPoint(egoCar.x,egoCar.y)
     p2 = RPoint(egoCar.x,egoCar.y-meter2pixel(5))
     p3 = RPoint(egoCar.x-meter2pixel(4),egoCar.y-meter2pixel(10))
     p4 = RPoint(egoCar.x-meter2pixel(4),egoCar.y-meter2pixel(15))
-    egoCar.step , egoCar.b_x, egoCar.b_y = Bezier(p1,p2,p3,p4)
+    egoCar.step , egoCar.b_x, egoCar.b_y ,egoCar.b_alpha1= Bezier(p1,p2,p3,p4)
     start_lane_change = 1
-    
+    lane_changing = 1
+  if(lane_changing):
+    egoCar.mode = 'lane_change'
   egoCar.drive(egoCar) # Relative coordinate 
   LFCar.drive(egoCar)
   FCar.drive(egoCar)
   LRCar.drive(egoCar)
   RCar.drive(egoCar)
+  print(str(egoCar.steerAngle) + "\n")
   
 
 def main():
