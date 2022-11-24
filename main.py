@@ -105,7 +105,7 @@ def cal_prob(eCar,TCar,i):
   else:
     eCar.r = math.sqrt(((1-eCar.gamma)*eCar.l*math.cos(eCar.alpha2_h))**2+(1/2*eCar.w*math.sin(eCar.alpha2_h))**2) 
   
-  eCar.lmda2 = 1 - ((eCar.vel-80)/80)
+  eCar.lmda2 = 0.5 - ((eCar.vel-80)/80)
   print(eCar.lmda2)
   #Calculate probability
   if eCar.D - eCar.R - eCar.r > 0:
@@ -144,7 +144,7 @@ def plot1(TCar,i):
   ax.set_aspect('equal', adjustable='box')
   plt.show()
 
-def plot2(TCar,i):
+def plotv(TCar,i=1):
   plt.plot(TCar.timeList2[i],TCar.vList[i])
   # plt.subplot(338)
   plt.show()
@@ -189,16 +189,19 @@ screen = pygame.display.set_mode((windowWidth,windowLength))
 pygame.display.set_caption("SoLab")
 whiteCar = pygame.image.load('pics/white_car.png')
 redCar = pygame.image.load('pics/red_car.png')
+blueCar = pygame.image.load('pics/blue_car.png')
 whiteCar = pygame.transform.scale(whiteCar, (meter2pixel(carLength), meter2pixel(carWidth)))
 whiteCar = pygame.transform.rotate(whiteCar, 90)
 redCar = pygame.transform.scale(redCar,(meter2pixel(carLength), meter2pixel(carWidth)))
 redCar = pygame.transform.rotate(redCar, 90)
+blueCar = pygame.transform.scale(blueCar,(meter2pixel(carWidth), meter2pixel(carLength)))
+# blueCar = pygame.transform.rotate(blueCar, 90)
 clock = pygame.time.Clock()
 
 egoCar = Car('R',20,80,0,False)
-LFCar  = Car('L',5,80,0,True)
+LFCar  = Car('L',5,78,0,True)
 FCar   = Car('R',10,77,0,True)
-LRCar  = Car('L',35,85,0,False)
+LRCar  = Car('L',35,82,0,False)
 RCar   = Car('R',35,90,0,False)
 start_lane_change = False
 lane_changing = False
@@ -218,7 +221,10 @@ def refreshScreen():
   cal_prob(RCar,egoCar,2)
   
   car_move()
-  screen.blit(whiteCar,(egoCar.x_tl,egoCar.y_tl))
+  if lane_changing:
+    screen.blit(blueCar,(egoCar.x_tl,egoCar.y_tl))
+  else:
+    screen.blit(whiteCar,(egoCar.x_tl,egoCar.y_tl))
   screen.blit(redCar,(LFCar.x_tl,LFCar.y_tl))
   screen.blit(redCar,(FCar.x_tl,FCar.y_tl))
   screen.blit(redCar,(RCar.x_tl,RCar.y_tl))
@@ -258,8 +264,8 @@ def main():
     refreshScreen()
       
   # plot_prob(egoCar,0)
-  plot1(egoCar,1)
-  plot2(LRCar,1)
+  plot1(egoCar,0)
+  plotv(egoCar)
   pygame.quit()
 
 if __name__ == '__main__':

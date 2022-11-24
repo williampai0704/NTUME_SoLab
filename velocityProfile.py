@@ -11,6 +11,6 @@ v = []
 for i in range(101):
     v.append(velocityProfile(i/100,60))
 
-# plt.plot(pList ,v)
-# plt.grid(True)
-# plt.show()
+plt.plot(pList ,v)
+plt.grid(True)
+plt.show()
