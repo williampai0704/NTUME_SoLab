@@ -57,7 +57,7 @@ class Car:
         self.vel = km_hr2pixel_fps(velocityProfile(self.probList[2][-1],self.vel_ideal))
       if finish_lane_change:
         self.vel = km_hr2pixel_fps(velocityProfile(self.probList[0][-1],self.vel_ideal))
-        
+
     if self.mode == 'stand_by':
       self.steerAngle = 0
       self.x += self.vel*math.sin(self.steerAngle) # Real x(pixel)
@@ -106,7 +106,7 @@ def cal_prob(eCar,TCar,i):
     eCar.r = math.sqrt(((1-eCar.gamma)*eCar.l*math.cos(eCar.alpha2_h))**2+(1/2*eCar.w*math.sin(eCar.alpha2_h))**2) 
   
   eCar.lmda2 = 0.5 - ((eCar.vel-80)/80)
-  print(eCar.lmda2)
+  #print(eCar.lmda2)
   #Calculate probability
   if eCar.D - eCar.R - eCar.r > 0:
     eCar.prob = eCar.lmda*exp(-eCar.lmda2*(eCar.D-eCar.R-eCar.r))
@@ -144,10 +144,31 @@ def plot1(TCar,i):
   ax.set_aspect('equal', adjustable='box')
   plt.show()
 
+
+def plot_report(TCar):
+  plt.subplot(131)
+  plt.plot(TCar.timeList[1],TCar.probList[1])
+  plt.xlabel('Risk to front car')
+  plt.subplot(132)
+  plt.plot(TCar.timeList[0],TCar.probList[0])
+  plt.xlabel('Risk to left front car')
+  plt.subplot(133)
+  plt.plot(TCar.timeList[3],TCar.probList[3])
+  plt.xlabel('Risk to left rear car')
+  plt.show()
+  
+  plt.plot(TCar.xList[0],TCar.yList[0])
+  plt.xlim(5, 10)
+  plt.ylim(-70,-100)
+  # ax = plt.gca()
+  # ax.set_aspect('equal', adjustable='box')
+  plt.show()
+  
 def plotv(TCar,i=1):
   plt.plot(TCar.timeList2[i],TCar.vList[i])
   # plt.subplot(338)
   plt.show()
+  
   
 
 def meter2pixel(m):
@@ -201,8 +222,8 @@ clock = pygame.time.Clock()
 egoCar = Car('R',20,80,0,False)
 LFCar  = Car('L',5,78,0,True)
 FCar   = Car('R',10,77,0,True)
-LRCar  = Car('L',35,82,0,False)
-RCar   = Car('R',35,90,0,False)
+LRCar  = Car('L',35,83,0,False)
+RCar   = Car('R',35,87,0,False)
 start_lane_change = False
 lane_changing = False
 finish_lane_change = False
@@ -219,6 +240,7 @@ def refreshScreen():
   cal_prob(egoCar,LFCar,2) # 2 = when lane changing
   cal_prob(LRCar,egoCar,2) 
   cal_prob(RCar,egoCar,2)
+  cal_prob(egoCar,LRCar,3) 
   
   car_move()
   if lane_changing:
@@ -234,7 +256,7 @@ def refreshScreen():
 def car_move():
   global start_lane_change
   global lane_changing
-  if(egoCar.probList[1][-1] >= 0.2 and start_lane_change == 0):
+  if(egoCar.probList[1][-1] >= 0.2 and egoCar.probList[3][-1] <= 0.5 and start_lane_change == 0):
     egoCar.mode = 'lane_change'
     p1 = RPoint(egoCar.x,egoCar.y)
     p2 = RPoint(egoCar.x,egoCar.y-meter2pixel(5))
@@ -260,12 +282,13 @@ def main():
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
         running = False
-    # keys = pygame.key.get_pressed()
     refreshScreen()
       
-  # plot_prob(egoCar,0)
-  plot1(egoCar,0)
-  plotv(egoCar)
+  # plot1(egoCar,0)
+  # plot1(egoCar,1)
+  # plotv(egoCar)
+  # plot1(egoCar,3)
+  plot_report(egoCar)
   pygame.quit()
 
 if __name__ == '__main__':

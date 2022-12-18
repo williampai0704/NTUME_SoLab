@@ -24,14 +24,14 @@ def Bezier(p1,p2,p3,p4):
         i+=1
     
     step = step/len(tList)
-    print(len(tList))
-    print(step)
-    plt.scatter(b_x,b_y)
-    plt.axis([0, 600, 0, 100])
-    plt.grid(True)
-    ax = plt.gca()
-    ax.set_aspect('equal', adjustable='box')
-    plt.show()
+    # print(len(tList))
+    # print(step)
+    # plt.plot(b_x,b_y)
+    # plt.axis([0, 600, 0, 100])
+    # plt.grid(True)
+    # ax = plt.gca()
+    # ax.set_aspect('equal', adjustable='box')
+    # plt.show()
     return step, b_x, b_y, b_alpha1
 
 def main():
