@@ -33,17 +33,17 @@ class Car:
     self.steerAngle = steerAngle/180*math.pi
     self.lane = lane   
     # self.acc = meter2pixel(acc)/10 #acceleration
-    self.probList   = [[] for i in range(6)]
-    self.timeList   = [[] for i in range(6)]
-    self.timeList2  = [[] for i in range(6)]
-    self.alpha1List = [[] for i in range(6)]
-    self.alpha2List = [[] for i in range(6)]
-    self.DList      = [[] for i in range(6)]
-    self.RList      = [[] for i in range(6)]
-    self.rList      = [[] for i in range(6)]
-    self.vList      = [[] for i in range(6)]
-    self.xList      = [[] for i in range(6)]
-    self.yList      = [[] for i in range(6)]
+    self.probList   = [[] for i in range(9)]
+    self.timeList   = [[] for i in range(9)]
+    self.timeList2  = [[] for i in range(9)]
+    self.alpha1List = [[] for i in range(9)]
+    self.alpha2List = [[] for i in range(9)]
+    self.DList      = [[] for i in range(9)]
+    self.RList      = [[] for i in range(9)]
+    self.rList      = [[] for i in range(9)]
+    self.vList      = [[] for i in range(9)]
+    self.xList      = [[] for i in range(9)]
+    self.yList      = [[] for i in range(9)]
     self.mode = 'stand_by'
     self.isFront = isFront
     self.acc = 0
@@ -54,29 +54,30 @@ class Car:
     global start_lane_change
     global at_last
     global at_front
+    global at_middle
     # self.vel += self.acc
     if not self.isFront:
       if not start_lane_change:
         if at_last:
-          self.vel = km_hr2pixel_s(velocityProfile(self.probList[4][-1],self.vel_ideal)) 
+          self.vel = km_hr2pixel_s(velocityProfile(self.probList[0][-1],self.vel_ideal)) 
         elif at_front:
-          self.vel = km_hr2pixel_s(velocityProfile(self.probList[5][-1],self.vel_ideal)) 
+          self.vel = km_hr2pixel_s(velocityProfile(self.probList[3][-1],self.vel_ideal)) 
         else:
-          self.vel = km_hr2pixel_s(velocityProfile(self.probList[1][-1],self.vel_ideal))
+          self.vel = km_hr2pixel_s(velocityProfile(self.probList[6][-1],self.vel_ideal))
       if lane_changing: 
         if at_last:
-          self.vel = km_hr2pixel_s(velocityProfile(self.probList[4][-1],self.vel_ideal)) 
+          self.vel = km_hr2pixel_s(velocityProfile(self.probList[1][-1],self.vel_ideal)) 
         elif at_front:
-          self.vel = km_hr2pixel_s(velocityProfile(self.probList[5][-1],self.vel_ideal))   
+          self.vel = km_hr2pixel_s(velocityProfile(self.probList[4][-1],self.vel_ideal))   
         else:
-          self.vel = km_hr2pixel_s(velocityProfile(self.probList[2][-1],self.vel_ideal))
+          self.vel = km_hr2pixel_s(velocityProfile(self.probList[7][-1],self.vel_ideal))
       if finish_lane_change:
         if at_last:
-          self.vel = km_hr2pixel_s(velocityProfile(self.probList[4][-1],self.vel_ideal))
+          self.vel = km_hr2pixel_s(velocityProfile(self.probList[2][-1],self.vel_ideal))
         elif at_front:
           self.vel = km_hr2pixel_s(velocityProfile(self.probList[5][-1],self.vel_ideal))
         else:
-          self.vel = km_hr2pixel_s(velocityProfile(self.probList[0][-1],self.vel_ideal))
+          self.vel = km_hr2pixel_s(velocityProfile(self.probList[8][-1],self.vel_ideal))
     # print("egoCar.vel ="+str(egoCar.vel))
     if self.mode == 'lane_change':
       self.i += int(self.vel/self.step)
@@ -102,7 +103,7 @@ class Car:
     self.y_ref = self.y - egoCar.y + meter2pixel(20)
     self.x_tl = self.x-meter2pixel(carWidth)/2  #top left x
     self.y_tl = self.y_ref-meter2pixel(carLength)/2 #top left y
-    for i in range(6):
+    for i in range(8):
       self.vList[i].append(pixel_s2km_hr(self.vel))
       self.xList[i].append(pixel2meter(self.x))
       self.yList[i].append(pixel2meter(self.y))
@@ -113,14 +114,15 @@ class Car:
     global predict_finish_lane_change
     global predict_at_last
     global predict_at_front
+    global predict_at_middle
     # global predict_start_lane_change
     if not self.isFront:
-      if predict_at_last:
-        self.vel = km_hr2pixel_s(velocityProfile(self.probList[4][-1],self.vel_ideal)) 
+      if at_last:
+        self.vel = km_hr2pixel_s(velocityProfile(self.probList[1][-1],self.vel_ideal)) 
       elif at_front:
-          self.vel = km_hr2pixel_s(velocityProfile(self.probList[5][-1],self.vel_ideal))   
+        self.vel = km_hr2pixel_s(velocityProfile(self.probList[4][-1],self.vel_ideal))   
       else:
-        self.vel = km_hr2pixel_s(velocityProfile(self.probList[2][-1],self.vel_ideal))
+        self.vel = km_hr2pixel_s(velocityProfile(self.probList[7][-1],self.vel_ideal))
     # add gaussian distribution
     self.acc = random.gauss(0,g2pixel_frame_frame(0.1*9.81))
     self.vel += self.acc
@@ -278,6 +280,9 @@ def drawRoad():
   pygame.draw.rect(screen,'yellow',line)
 
 def riskPredict():
+  global predict_at_last
+  global predict_at_front
+  global predict_at_middle
   f_egoCar = Car(egoCar.lane,pixel2meter(egoCar.y),egoCar.vel2,egoCar.steerAngle,egoCar.isFront)
   f_LFCar  = Car(LFCar.lane,pixel2meter(LFCar.y),LFCar.vel2,LFCar.steerAngle,LFCar.isFront)
   f_FCar   = Car(FCar.lane,pixel2meter(FCar.y),FCar.vel2,FCar.steerAngle,FCar.isFront)
@@ -295,22 +300,32 @@ def riskPredict():
     # predict_start_lane_change = 1
     # predict_lane_changing = 1
     f_egoCar.mode = 'lane_change'
-    cal_prob(f_egoCar,f_LFCar,0) # 0 = track after lane change
-    cal_prob(f_RCar,f_FCar,0)
-    cal_prob(f_LRCar,f_egoCar,0)
-    cal_prob(f_egoCar,f_FCar,1) # 1 = track before lane change 
+    cal_prob(f_egoCar,f_FCar,0) # 0 = egoCar will be at last before lane change
+    cal_prob(f_LRCar,f_LFCar,0)
+    cal_prob(f_RCar,f_egoCar,0)
+    cal_prob(f_LRCar,f_LFCar,1) # 1 = egoCar will be at last when lane changing
+    cal_prob(f_egoCar,f_LRCar,1)
     cal_prob(f_RCar,f_egoCar,1)
-    cal_prob(f_LRCar,f_LFCar,1)
-    cal_prob(f_egoCar,f_LFCar,2) # 2 = when lane changing
-    cal_prob(f_LRCar,f_egoCar,2) 
-    cal_prob(f_RCar,f_egoCar,2) 
-    cal_prob(f_egoCar,f_LRCar,3)
-    cal_prob(f_egoCar,f_LRCar,4) # 4 = egoCar at last
-    cal_prob(f_LRCar,f_LFCar,4)
-    cal_prob(f_RCar,f_FCar,4)
-    cal_prob(f_LRCar,f_LFCar,5) # 5 = egoCar at front
+    cal_prob(f_LRCar,f_LFCar,2) # 2 = egoCar will be at last after lane change
+    cal_prob(f_egoCar,f_LRCar,2)
+    cal_prob(f_RCar,f_FCar,2)
+    cal_prob(f_LRCar,f_LFCar,3) # 3 = egoCar will be at front before lane change
+    cal_prob(f_egoCar,f_FCar,3)
+    cal_prob(f_RCar,f_egoCar,3)
+    cal_prob(f_LRCar,f_LFCar,4) # 4 = egoCar will be at front when lane changing
+    cal_prob(f_egoCar,f_FCar,4)
+    cal_prob(f_RCar,f_egoCar,4)
+    cal_prob(f_LRCar,f_LFCar,5) # 5 = egoCar will be at front after lane change
     cal_prob(f_RCar,f_FCar,5)
-    cal_prob(f_LFCar,f_egoCar,5)
+    cal_prob(f_LRCar,f_LFCar,6) # 6 = egoCar will be at middle before lane change
+    cal_prob(f_egoCar,f_FCar,6)
+    cal_prob(f_RCar,f_egoCar,6)
+    cal_prob(f_LRCar,f_egoCar,7) # 7 = egoCar will be at middle when lane changing
+    cal_prob(f_egoCar,f_LFCar,7)
+    cal_prob(f_RCar,f_egoCar,7)
+    cal_prob(f_LRCar,f_egoCar,8) # 8 = egoCar will be at middle after lane change
+    cal_prob(f_egoCar,f_LFCar,8)
+    cal_prob(f_RCar,f_FCar,8)
      
     
     f_egoCar.predict_drive(f_egoCar) # Relative coordinate 
@@ -324,15 +339,29 @@ def riskPredict():
     # f_center_point = pygame.draw.circle(screen,'green', (f_FCar.x,f_FCar.y_ref), 5)
     
   
-  avg_risk0 = sum(f_egoCar.probList[0])/len(f_egoCar.probList[0])
-  avg_risk1 = sum(f_egoCar.probList[1])/len(f_egoCar.probList[1])
-  avg_risk2 = sum(f_egoCar.probList[2])/len(f_egoCar.probList[2])
-  avg_risk3 = sum(f_egoCar.probList[3])/len(f_egoCar.probList[3])
-  max_risk0 = max(f_egoCar.probList[0])
-  max_risk1 = max(f_egoCar.probList[1])
-  max_risk2 = max(f_egoCar.probList[2])
-  max_risk3 = max(f_egoCar.probList[3])
-  return avg_risk0 , avg_risk1, avg_risk2, avg_risk3, max_risk0, max_risk1, max_risk2, max_risk3
+  if at_last:
+    avg_risk0 = sum(f_egoCar.probList[0])/len(f_egoCar.probList[0]) # FCar
+    avg_risk1 = sum(f_egoCar.probList[1])/len(f_egoCar.probList[1]) # LRCar
+    avg_risk2 = 0
+    max_risk0 = max(f_egoCar.probList[0])
+    max_risk1 = max(f_egoCar.probList[1])
+    max_risk2 = 0
+  elif at_front:
+    avg_risk0 = sum(f_egoCar.probList[3])/len(f_egoCar.probList[0]) # FCar
+    avg_risk1 = sum(f_egoCar.probList[7])/len(f_egoCar.probList[1]) # LFCar
+    avg_risk2 = 0
+    max_risk0 = max(f_egoCar.probList[3])
+    max_risk1 = max(f_egoCar.probList[7])
+    max_risk2 = 0
+  else:
+    avg_risk0 = sum(f_egoCar.probList[0])/len(f_egoCar.probList[0]) # FCar
+    avg_risk1 = sum(f_egoCar.probList[8])/len(f_egoCar.probList[1]) # LFCar
+    avg_risk2 = sum(f_egoCar.probList[1])/len(f_egoCar.probList[2]) # LRCar
+    max_risk0 = max(f_egoCar.probList[0])
+    max_risk1 = max(f_egoCar.probList[8])
+    max_risk2 = max(f_egoCar.probList[1])
+    
+  return avg_risk0 , avg_risk1, avg_risk2, max_risk0, max_risk1, max_risk2
   
   
     
@@ -365,42 +394,55 @@ blueCar = pygame.transform.scale(blueCar,(meter2pixel(carWidth), meter2pixel(car
 clock = pygame.time.Clock()
 
 egoCar = Car('R',20,60,0,False)
-LFCar  = Car('L',10,62,0,True)
-FCar   = Car('R',10,56,0,True)
-LRCar  = Car('L',35,63,0,False)
+LFCar  = Car('L',10,52,0,True)
+FCar   = Car('R',10,57,0,True)
+LRCar  = Car('L',35,55,0,False)
 RCar   = Car('R',35,64,0,False)
 start_lane_change = False
 lane_changing = False
 finish_lane_change = False
 at_last = False
 at_front = False
+at_middle = True
 predict_start_lane_change = False
 predict_lane_changing = False
 predict_finish_lane_change = False
 predict_at_last = False
 predict_at_front = False
+pedict_at_middle = True
 bezier_point = [10,20,30]
 
 
 def refreshScreen():
   drawRoad()
   
-  cal_prob(egoCar,LFCar,0) # 0 = track after lane change
-  cal_prob(RCar,FCar,0)
-  cal_prob(LRCar,egoCar,0)
-  cal_prob(egoCar,FCar,1) # 1 = track before lane change 
-  cal_prob(LRCar,LFCar,1)
+  cal_prob(egoCar,FCar,0) # 0 = egoCar will be at last before lane change
+  cal_prob(LRCar,LFCar,0)
+  cal_prob(RCar,egoCar,0)
+  cal_prob(LRCar,LFCar,1) # 1 = egoCar will be at last when lane changing
+  cal_prob(egoCar,LRCar,1)
   cal_prob(RCar,egoCar,1)
-  cal_prob(egoCar,LFCar,2) # 2 = when lane changing
-  cal_prob(LRCar,egoCar,2) 
-  cal_prob(RCar,egoCar,2)
-  cal_prob(egoCar,LRCar,3) 
-  cal_prob(egoCar,LRCar,4) # 4 = egoCar at last
-  cal_prob(LRCar,LFCar,4)
-  cal_prob(RCar,FCar,4)
-  cal_prob(LRCar,LFCar,5) # 5 = egoCar at front
+  cal_prob(LRCar,LFCar,2) # 2 = egoCar will be at last after lane change
+  cal_prob(egoCar,LRCar,2)
+  cal_prob(RCar,FCar,2)
+  cal_prob(LRCar,LFCar,3) # 3 = egoCar will be at front before lane change
+  cal_prob(egoCar,FCar,3)
+  cal_prob(RCar,egoCar,3)
+  cal_prob(LRCar,LFCar,4) # 4 = egoCar will be at front when lane changing
+  cal_prob(egoCar,FCar,4)
+  cal_prob(RCar,egoCar,4)
+  cal_prob(LRCar,LFCar,5) # 5 = egoCar will be at front after lane change
   cal_prob(RCar,FCar,5)
-  cal_prob(LFCar,egoCar,5)
+  cal_prob(LRCar,LFCar,6) # 6 = egoCar will be at middle before lane change
+  cal_prob(egoCar,FCar,6)
+  cal_prob(RCar,egoCar,6)
+  cal_prob(LRCar,egoCar,7) # 7 = egoCar will be at middle when lane changing
+  cal_prob(egoCar,LFCar,7)
+  cal_prob(RCar,egoCar,7)
+  cal_prob(LRCar,egoCar,8) # 8 = egoCar will be at middle after lane change
+  cal_prob(egoCar,LFCar,8)
+  cal_prob(RCar,FCar,8)
+  
   
   car_move()
   if lane_changing:
@@ -431,21 +473,20 @@ def car_move():
   global predict_finish_lane_change
   global at_last
   global at_front
-  if(egoCar.probList[1][-1] >= 0.1 and egoCar.probList[3][-1] <= 0.5 and start_lane_change == 0):
-    avg_risk0 , avg_risk1, avg_risk2, avg_risk3, max_risk0, max_risk1, max_risk2, max_risk3 = riskPredict()
+  if(egoCar.probList[6][-1] >= 0.1 and egoCar.probList[7][-1] <= 0.5 and start_lane_change == 0):
+    avg_risk0 , avg_risk1, avg_risk2, max_risk0, max_risk1, max_risk2 = riskPredict()
     print(avg_risk0)
     print(avg_risk1)
-    print(avg_risk3)
+    print(avg_risk2)
     print(max_risk0)
     print(max_risk1)
     print(max_risk2)
-    print(max_risk3)
     print("========================")
-    if (avg_risk0 <= 0.4 and avg_risk1 <= 0.6 and avg_risk3 <= 0.3 and max(max_risk0,max_risk1,max_risk2,max_risk3) <= 0.4):
+    if (avg_risk0 <= 0.4 and avg_risk1 <= 0.5 and avg_risk2 <= 0.3 and max(max_risk0,max_risk1,max_risk2) <= 0.5):
       print("predict success")
       print(avg_risk0)
       print(avg_risk1)
-      print(avg_risk3)
+      print(avg_risk2)
       egoCar.mode = 'lane_change'
       p1 = RPoint(egoCar.x,egoCar.y)
       p2 = RPoint(egoCar.x,egoCar.y-meter2pixel(bezier_point[0]))
@@ -460,10 +501,15 @@ def car_move():
       
   if (LRCar.y < egoCar.y):
     at_last = True
-  if (LFCar.y > egoCar.y):
+    at_middle = False
+    print("change to at last")
+  elif (LFCar.y > egoCar.y):
     at_front = True 
-    egoCar.isFront = True
-    LFCar.isFront = False  
+    at_moddle = False
+    egoCar.isFront = True  
+    print("change to at front")
+  else:
+    print("still in middle")
   if(lane_changing):
     egoCar.mode = 'lane_change'
   egoCar.drive(egoCar) # Relative coordinate 
@@ -487,7 +533,7 @@ def main():
   # plot1(egoCar,1)
   # plotv(egoCar)
   # plot1(egoCar,3)
-  plot_report(egoCar)
+  # plot_report(egoCar)
   pygame.quit()
 
 if __name__ == '__main__':
