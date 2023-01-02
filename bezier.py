@@ -34,13 +34,13 @@ def Bezier(p1,p2,p3,p4):
     # plt.show()
     return step, b_x, b_y, b_alpha1
 
-def main():
-    p1 = RPoint(0,0)
-    p2 = RPoint(200,0)
-    p3 = RPoint(400,80)
-    p4 = RPoint(600,80)
-    step, b_x,b_y = Bezier(p1,p2,p3,p4)
+# def main():
+#     p1 = RPoint(0,0)
+#     p2 = RPoint(200,0)
+#     p3 = RPoint(400,80)
+#     p4 = RPoint(600,80)
+#     step, b_x,b_y,b_alpha_1 = Bezier(p1,p2,p3,p4)
+#     print(b_x)
     
-    
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
