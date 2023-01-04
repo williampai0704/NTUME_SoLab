@@ -192,69 +192,50 @@ def cal_prob(eCar,TCar,i):
   eCar.rList[i].append(eCar.r)
   
 
-  
-def plot1(TCar,i):
-  plt.subplot(121)
-  plt.plot(TCar.timeList[i],TCar.probList[i])
-  # plt.subplot(332)
-  # # plt.plot(TCar.timeList[i],TCar.alpha1List[i])
-  # # plt.subplot(333)
-  # # plt.plot(TCar.timeList[i],TCar.alpha2List[i])
-  # # plt.subplot(334)
-  # # plt.plot(TCar.timeList[i],TCar.DList[i])
-  # # plt.subplot(335)
-  # # plt.plot(TCar.timeList[i],TCar.RList[i])
-  # plt.subplot(336)
-  # plt.plot(TCar.timeList[i],TCar.rList[i])
-  # plt.subplot(337)
-  # plt.plot(TCar.timeList2[i],TCar.yList[i])
-  # plt.subplot(338)
-  plt.subplot(122)
-  plt.plot(TCar.xList[i],TCar.yList[i])
-  plt.xlim(0, 10)
-  ax = plt.gca()
-  ax.set_aspect('equal', adjustable='box')
-  plt.show()
+
 
 # =================================================================================
 
 def plot_report(TCar):
-  plt.subplot(141)
-  plt.plot(TCar.timeList[1],TCar.probList[1])
-  plt.xlabel('alpha to front car')
-  plt.subplot(142)
+  plt.subplot(131)
   plt.plot(TCar.timeList[0],TCar.probList[0])
+  plt.xlabel('Risk to front car')
+  plt.subplot(132)
+  plt.plot(TCar.timeList[7],TCar.probList[7])
   plt.xlabel('Risk to left front car')
-  plt.subplot(143)
-  plt.plot(TCar.timeList[3],TCar.probList[3])
+  plt.subplot(133)
+  plt.plot(TCar.timeList[1],TCar.probList[1])
   plt.xlabel('Risk to left rear car')
-  plt.subplot(144)
-  plt.plot(TCar.timeList[4],TCar.probList[4])
-  plt.xlabel('Risk to rear car')
   plt.show()
   
-  plt.subplot(221)
-  newlist = [x1 - x2 for (x1, x2) in zip(LFCar.yList[0], egoCar.yList[0])]
-  plt.plot(LFCar.timeList2[3],newlist)
-  # plt.xlim(5, 10)
-  # plt.ylim(-70,-100)
-  # ax = plt.gca()
-  # ax.set_aspect('equal', adjustable='box')
-  plt.subplot(222)
-  plt.plot(egoCar.timeList[0],egoCar.DList[0])
-  plt.subplot(223)
-  newlist2 = [x1 - x2 for (x1, x2) in zip(LRCar.yList[0], egoCar.yList[0])]
-  plt.plot(LRCar.timeList2[3],newlist2)
-  plt.subplot(224)
-  plt.plot(egoCar.timeList[3],egoCar.DList[3])
+  plt.subplot(131)
+  plt.plot(timeList0,probList0)
+  plt.xlabel('Predict Risk 1')
+  plt.subplot(132)
+  plt.plot(timeList1,probList1)
+  plt.xlabel('Predict Risk 2')
+  plt.subplot(133)
+  plt.plot(timeList2,probList2)
+  plt.xlabel('Predict Risk 3')
   plt.show()
   
-  plt.subplot
+  # plt.subplot(221)
+  # newlist = [x1 - x2 for (x1, x2) in zip(LFCar.yList[0], egoCar.yList[0])]
+  # plt.plot(LFCar.timeList2[3],newlist)
+  # # plt.xlim(5, 10)
+  # # plt.ylim(-70,-100)
+  # # ax = plt.gca()
+  # # ax.set_aspect('equal', adjustable='box')
+  # plt.subplot(222)
+  # plt.plot(egoCar.timeList[0],egoCar.DList[0])
+  # plt.subplot(223)
+  # newlist2 = [x1 - x2 for (x1, x2) in zip(LRCar.yList[0], egoCar.yList[0])]
+  # plt.plot(LRCar.timeList2[3],newlist2)
+  # plt.subplot(224)
+  # plt.plot(egoCar.timeList[3],egoCar.DList[3])
+  # plt.show()
   
-def plotv(TCar,i=1):
-  plt.plot(TCar.timeList2[i],TCar.vList[i])
-  # plt.subplot(338)
-  plt.show()
+  
   
 def meter2pixel(m):
   return m*20
@@ -335,7 +316,7 @@ def riskPredict():
     f_RCar.predict_drive(f_egoCar)
     f_center_point = pygame.draw.circle(screen,'red', (f_egoCar.x,f_egoCar.y_ref), 5)
     f_center_point = pygame.draw.circle(screen,'green', (f_LRCar.x,f_LRCar.y_ref), 5)
-    # f_center_point = pygame.draw.circle(screen,'green', (f_LFCar.x,f_LFCar.y_ref), 5)
+    f_center_point = pygame.draw.circle(screen,'green', (f_LFCar.x,f_LFCar.y_ref), 5)
     # f_center_point = pygame.draw.circle(screen,'green', (f_FCar.x,f_FCar.y_ref), 5)
     
   
@@ -346,22 +327,43 @@ def riskPredict():
     max_risk0 = max(f_egoCar.probList[0])
     max_risk1 = max(f_egoCar.probList[1])
     max_risk2 = 0
+    probList0 = f_egoCar.probList[0]
+    probList1 = f_egoCar.probList[1]
+    probList2 = 0
+    timeList0 = f_egoCar.timeList[0]
+    timeList1 = f_egoCar.timeList[1]
+    timeList2 = 0
+    
+    
   elif at_front:
-    avg_risk0 = sum(f_egoCar.probList[3])/len(f_egoCar.probList[0]) # FCar
-    avg_risk1 = sum(f_egoCar.probList[7])/len(f_egoCar.probList[1]) # LFCar
+    avg_risk0 = sum(f_egoCar.probList[3])/len(f_egoCar.probList[3]) # FCar
+    avg_risk1 = sum(f_egoCar.probList[7])/len(f_egoCar.probList[7]) # LFCar
     avg_risk2 = 0
     max_risk0 = max(f_egoCar.probList[3])
     max_risk1 = max(f_egoCar.probList[7])
     max_risk2 = 0
+    probList0 = f_egoCar.probList[3]
+    probList1 = f_egoCar.probList[7]
+    probList2 = 0
+    timeList0 = f_egoCar.timeList[3]
+    timeList1 = f_egoCar.timeList[7]
+    timeList2 = 0
+   
   else:
     avg_risk0 = sum(f_egoCar.probList[0])/len(f_egoCar.probList[0]) # FCar
-    avg_risk1 = sum(f_egoCar.probList[8])/len(f_egoCar.probList[1]) # LFCar
-    avg_risk2 = sum(f_egoCar.probList[1])/len(f_egoCar.probList[2]) # LRCar
+    avg_risk1 = sum(f_egoCar.probList[8])/len(f_egoCar.probList[8]) # LFCar
+    avg_risk2 = sum(f_egoCar.probList[1])/len(f_egoCar.probList[1]) # LRCar
     max_risk0 = max(f_egoCar.probList[0])
     max_risk1 = max(f_egoCar.probList[8])
     max_risk2 = max(f_egoCar.probList[1])
+    probList0 = f_egoCar.probList[0]
+    probList1 = f_egoCar.probList[8]
+    probList2 = f_egoCar.probList[1]
+    timeList0 = f_egoCar.timeList[0]
+    timeList1 = f_egoCar.timeList[8]
+    timeList2 = f_egoCar.timeList[1]
     
-  return avg_risk0 , avg_risk1, avg_risk2, max_risk0, max_risk1, max_risk2
+  return avg_risk0 , avg_risk1, avg_risk2, max_risk0, max_risk1, max_risk2 , probList0, probList1, probList2, timeList0, timeList1, timeList2
   
   
     
@@ -394,9 +396,9 @@ blueCar = pygame.transform.scale(blueCar,(meter2pixel(carWidth), meter2pixel(car
 clock = pygame.time.Clock()
 
 egoCar = Car('R',20,60,0,False)
-LFCar  = Car('L',10,52,0,True)
-FCar   = Car('R',10,57,0,True)
-LRCar  = Car('L',35,55,0,False)
+LFCar  = Car('L',18,58,0,True)
+FCar   = Car('R',12,57,0,True)
+LRCar  = Car('L',25,57,0,False)
 RCar   = Car('R',35,64,0,False)
 start_lane_change = False
 lane_changing = False
@@ -473,16 +475,24 @@ def car_move():
   global predict_finish_lane_change
   global at_last
   global at_front
+  global probList0
+  global probList1
+  global probList2
+  global timeList0
+  global timeList1
+  global timeList2
   if(egoCar.probList[6][-1] >= 0.1 and egoCar.probList[7][-1] <= 0.5 and start_lane_change == 0):
-    avg_risk0 , avg_risk1, avg_risk2, max_risk0, max_risk1, max_risk2 = riskPredict()
+    avg_risk0 , avg_risk1, avg_risk2, max_risk0, max_risk1, max_risk2 ,probList0, probList1, probList2, timeList0, timeList1, timeList2= riskPredict()
     print(avg_risk0)
     print(avg_risk1)
     print(avg_risk2)
     print(max_risk0)
     print(max_risk1)
     print(max_risk2)
+    
     print("========================")
     if (avg_risk0 <= 0.4 and avg_risk1 <= 0.5 and avg_risk2 <= 0.3 and max(max_risk0,max_risk1,max_risk2) <= 0.5):
+      
       print("predict success")
       print(avg_risk0)
       print(avg_risk1)
@@ -533,7 +543,7 @@ def main():
   # plot1(egoCar,1)
   # plotv(egoCar)
   # plot1(egoCar,3)
-  # plot_report(egoCar)
+  plot_report(egoCar)
   pygame.quit()
 
 if __name__ == '__main__':
