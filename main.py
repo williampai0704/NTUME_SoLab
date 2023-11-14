@@ -396,7 +396,7 @@ blueCar = pygame.transform.scale(blueCar,(meter2pixel(carWidth), meter2pixel(car
 clock = pygame.time.Clock()
 
 egoCar = Car('R',20,60,0,False)
-LFCar  = Car('L',18,58,0,True)
+LFCar  = Car('L',15,61,0,True)
 FCar   = Car('R',12,57,0,True)
 LRCar  = Car('L',25,57,0,False)
 RCar   = Car('R',35,64,0,False)
